@@ -1,0 +1,19 @@
+[package]
+name = "muon-multicast"
+version = "0.1.0"
+authors = ["David Dawson <me@daviddawson.me>"]
+
+[dependencies]
+libc = "0.2"
+net2 = "0.2.27"
+mio = "0.6.6"
+log = "0.3.6"
+env_logger = "0.4.0"
+
+[lib]
+name = "muon_multicast"
+crate-type = ["dylib"]
+
+[[bin]]
+name = "mybin"
+path = "src/bin.rs"
