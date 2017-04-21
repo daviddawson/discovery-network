@@ -39,8 +39,7 @@ pub extern fn on_ready(target: *mut MulticastDiscovery, call: OnReady) {
 
 #[no_mangle]
 pub extern fn create(name: *const u8) -> *mut MulticastDiscovery {
-    let mut mydisco = Box::new(discovery::run());
-    return &mut *mydisco;
+    Box::into_raw(Box::new(discovery::run()))
 }
 
 #[no_mangle]

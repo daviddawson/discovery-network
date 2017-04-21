@@ -10,10 +10,15 @@ use std::thread;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::time::Duration;
+use std::ops::Drop;
 
 use self::mio::*;
 use self::mio::net::UdpSocket;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+
+pub trait Callme {
+    fn callback(&self);
+}
 
 #[repr(C)]
 pub struct ServiceDescriptor {
@@ -46,7 +51,14 @@ pub struct MulticastData {
 
 #[repr(C)]
 pub struct MulticastDiscovery {
+    pub name: &'static str,
     pub lock: Arc<Mutex<MulticastData>>
+}
+
+impl Callme for MulticastDiscovery {
+    fn callback(&self) {
+        println!("callback on trait");
+    }
 }
 
 pub fn run() -> MulticastDiscovery{
@@ -75,7 +87,7 @@ impl MulticastDiscovery {
                 let data = threaddata.lock().unwrap();
                 println!("Data is {}", data.name);
             }
-            thread::sleep(Duration::from_millis(3000));
+            thread::sleep(Duration::from_millis(2000));
             {
                 let data = threaddata.lock().unwrap();
                 println!("Data is {}", data.name);
@@ -103,7 +115,7 @@ impl MulticastDiscovery {
 
 //        let mut stream = tcp.connect("127.0.0.1:80").unwrap();
 
-        return MulticastDiscovery { lock:data };
+        return MulticastDiscovery { lock:data, name:"Happy" };
     }
 
     pub fn on_ready<F>(& mut self, arg: F)
@@ -112,14 +124,19 @@ impl MulticastDiscovery {
 //        println!("CALLED A ATTACHED METHOD!");
         arg();
     }
-    pub fn advertise_local_service(&self, descriptor: &ServiceDescriptor) {
-        let data = self.lock.lock();
-//        data.name = "HELLO WORLD";
+    pub fn advertise_local_service(& mut self, descriptor: &ServiceDescriptor) {
+        println!("Got 0, {}", self.name);
+        let data = self.lock.clone();
+        println!("Got 1");
+        let mut dat = data.lock().unwrap();
+        println!("Got 2");
+        dat.name = "HELLO WORLD";
         println!("Advertising a local instance {}", descriptor.get_identifier());
     }
 
     pub fn shutdown(& mut self) {
-        println!("Internal shutdown has been called")
+        println!("Internal shutdown has been called");
+
     }
 
     pub fn get_known_services(& mut self) /* TODO -> [ServiceDescriptor] */ {
