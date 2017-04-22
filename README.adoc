@@ -1,0 +1,3 @@
+# UDP discovery plugin
+
+Adds udp based discovery mechanisms. 
