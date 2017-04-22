@@ -21,7 +21,7 @@ fn main() {
 
     disco.get_known_services();
 
-    thread::sleep(Duration::from_millis(4000));
+    thread::sleep(Duration::from_millis(15000));
     println!("RAGGLE");
 
 }
