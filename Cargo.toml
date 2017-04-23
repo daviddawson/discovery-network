@@ -1,5 +1,5 @@
 [package]
-name = "muon-multicast"
+name = "muon-discovery-net"
 version = "0.1.0"
 authors = ["David Dawson <me@daviddawson.me>"]
 
@@ -12,7 +12,7 @@ env_logger = "0.4.0"
 bytes      = "0.3.0"
 
 [lib]
-name = "muon_multicast"
+name = "muon_discovery_net"
 crate-type = ["dylib"]
 
 [[bin]]

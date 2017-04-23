@@ -1,38 +1,28 @@
+
+
 buildscript {
-    ext {
-        springBootVersion = '1.2.2.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
-apply plugin: 'groovy'
-apply plugin: 'spring-boot'
-
-sourceCompatibility = 1.8
-version = '1.0'
-
-repositories {
+  repositories {
     jcenter()
-    maven { url 'https://simplicityitself.artifactoryonline.com/simplicityitself/muon' }
+    maven {
+      url 'http://maven.tmatesoft.com/content/repositories/releases/'
+    }
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+      url "https://simplicityitself.artifactoryonline.com/simplicityitself/muon"
+    }
+  }
+  dependencies {
+    classpath 'io.muoncore.release:muon-java-release:0.0.2-SNAPSHOT'
+    classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '3.2.0')
+    classpath "io.franzbecker:gradle-lombok:1.8"
+  }
 }
 
-dependencies {
-    def muonVersion = "7.1.5"
-
-    compile "io.muoncore:muon-core:$muonVersion"
-    compile "io.muoncore:muon-transport-amqp:$muonVersion"
-    compile "io.muoncore:muon-discovery-amqp:$muonVersion"
-    testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
-    compile 'org.slf4j:slf4j-simple:1.7.21'
-
-    compile 'net.java.dev.jna:jna:4.4.0'
+ext {
+  reactiveStreamsVersion = "1.0.0"
+  reactorVersion = '2.0.7.RELEASE'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
-}
+apply plugin: 'io.muoncore.release'

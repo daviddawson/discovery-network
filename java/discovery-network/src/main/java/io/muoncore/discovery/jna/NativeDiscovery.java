@@ -3,7 +3,10 @@ package io.muoncore.discovery.jna;
 import com.sun.jna.*;
 import io.muoncore.Discovery;
 import io.muoncore.ServiceDescriptor;
+import org.scijava.nativelib.NativeLibraryUtil;
+import org.scijava.nativelib.NativeLoader;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +34,11 @@ public class NativeDiscovery implements Discovery {
         Pointer create(String name);
     }
 
-    public NativeDiscovery(String libName) {
+    public NativeDiscovery(String libName) throws IOException {
+
+//        NativeLoader.loadLibrary(libName);
+//        NativeLibraryUtil.loadNativeLibrary(NativeDiscovery.class, libName);
+
         discoLib = Native.loadLibrary(libName,
                 DiscoveryLib.class);
         instance = discoLib.create("WOOT BOOT");

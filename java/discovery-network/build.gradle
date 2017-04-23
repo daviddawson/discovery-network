@@ -15,5 +15,6 @@ dependencies {
   testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
   testCompile 'org.slf4j:slf4j-simple:1.7.21'
 
+  compile 'org.scijava:native-lib-loader:2.1.4'
   compile 'net.java.dev.jna:jna:4.4.0'
 }

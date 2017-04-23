@@ -1,8 +1,10 @@
 
 all: package
 
-package:
-	./gradlew bootRepackage
+package: clean
+	pwd
+	cp ../target/release/libmuon_discovery_net.so discovery-network/src/main/resources/linux-x86-64/
+	./gradlew artifactoryPublish
 
 clean:
 	./gradlew clean
@@ -10,9 +12,9 @@ clean:
 test:
 	./gradlew test
 
-docker:
-	docker build . -t molecule-core
-
-docker-release: package docker
-	docker tag molecule-core simplicityitself-discoInstance-image.jfrog.io/molecule-core:latest
-	docker push simplicityitself-discoInstance-image.jfrog.io/molecule-core:latest
+version:
+	echo version=$(VERSION)>gradle.properties
+	echo group=io.muoncore>>gradle.properties
+	echo rootOnly=true>>gradle.properties
+	echo exclude=>>gradle.properties
+	git add gradle.properties

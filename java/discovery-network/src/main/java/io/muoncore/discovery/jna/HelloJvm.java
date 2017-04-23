@@ -6,6 +6,8 @@ import io.muoncore.ServiceDescriptor;
 import io.muoncore.config.AutoConfiguration;
 import io.muoncore.config.MuonConfigBuilder;
 import io.muoncore.protocol.reactivestream.server.PublisherLookup;
+import org.scijava.nativelib.NativeLibraryUtil;
+import org.scijava.nativelib.NativeLoader;
 import reactor.core.processor.CancelException;
 import reactor.rx.broadcast.Broadcaster;
 
@@ -18,19 +20,21 @@ import static java.util.Collections.emptyList;
 public class HelloJvm {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-
-        NativeDiscovery disco = new NativeDiscovery("muon_multicast");
-
-        disco.onReady(() -> {
-            System.out.println("WOOT");
-        });
-
-        disco.advertiseLocalService(new ServiceDescriptor("wibble" + System.currentTimeMillis(), emptyList(), emptyList(), emptyList(), emptyList()));
-
-        //TODO, somehow integrate https://github.com/scijava/native-lib-loader
-
-        Thread.sleep(40000);
-        disco.shutdown();
+//        NativeLibraryUtil.loadNativeLibrary(HelloJvm.class, "muon_discovery_net");
+//        NativeLoader.loadLibrary("muon_discovery_net");
+//
+        NativeDiscovery disco = new NativeDiscovery("muon_discovery_net");
+//
+//        disco.onReady(() -> {
+//            System.out.println("WOOT");
+//        });
+//
+//        disco.advertiseLocalService(new ServiceDescriptor("wibble" + System.currentTimeMillis(), emptyList(), emptyList(), emptyList(), emptyList()));
+//
+//        //TODO, somehow integrate https://github.com/scijava/native-lib-loader
+//
+//        Thread.sleep(40000);
+//        disco.shutdown();
 //        DiscoInstance muon = getMuon();
 
 //        muon.getDiscovery().blockUntilReady();
