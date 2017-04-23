@@ -1,0 +1,19 @@
+
+apply plugin: 'java'
+
+repositories {
+  jcenter()
+  maven { url 'https://simplicityitself.artifactoryonline.com/simplicityitself/muon' }
+}
+
+dependencies {
+  def muonVersion = "7.2.9"
+
+  compile "io.muoncore:muon-core:$muonVersion"
+  compile "io.muoncore:muon-transport-amqp:$muonVersion"
+  compile "io.muoncore:muon-discovery-amqp:$muonVersion"
+  testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
+  testCompile 'org.slf4j:slf4j-simple:1.7.21'
+
+  compile 'net.java.dev.jna:jna:4.4.0'
+}

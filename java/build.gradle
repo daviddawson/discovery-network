@@ -1,0 +1,38 @@
+buildscript {
+    ext {
+        springBootVersion = '1.2.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'spring-boot'
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+repositories {
+    jcenter()
+    maven { url 'https://simplicityitself.artifactoryonline.com/simplicityitself/muon' }
+}
+
+dependencies {
+    def muonVersion = "7.1.5"
+
+    compile "io.muoncore:muon-core:$muonVersion"
+    compile "io.muoncore:muon-transport-amqp:$muonVersion"
+    compile "io.muoncore:muon-discovery-amqp:$muonVersion"
+    testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile 'org.slf4j:slf4j-simple:1.7.21'
+
+    compile 'net.java.dev.jna:jna:4.4.0'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.3'
+}
