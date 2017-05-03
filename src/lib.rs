@@ -39,25 +39,24 @@ pub struct ServiceDescriptor {
 pub extern fn advertise_local_service(target: *mut MulticastDiscovery, descriptor:ServiceDescriptor) {
   println!("Advertising? {}", descriptor.tags_length);
 
-  let tagslice = unsafe {
-    std::slice::from_raw_parts(descriptor.tags as *const *const c_char, descriptor.tags_length as usize)
+  let desc = unsafe { discovery::ServiceDescriptor {
+    identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
+    tags: array_to_vec(descriptor.tags, descriptor.tags_length),
+    codecs: array_to_vec(descriptor.codecs, descriptor.codecs_length),
+    connection_urls: array_to_vec(descriptor.connection_urls, descriptor.connection_urls_length),
+  } };
+}
+
+fn array_to_vec<'a>(vals: *const *const c_char, len: size_t) -> Vec<&'a str>
+{
+
+  let arr = unsafe {
+    std::slice::from_raw_parts(vals, len as usize)
       .iter().map(|tag| {
       let val = CStr::from_ptr((*tag)).to_str();
       return val.unwrap();
     })
   };
-
-  let desc = unsafe { discovery::ServiceDescriptor {
-    identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
-    tags: array_to_vec(tagslice),
-//    codecs: array_to_vec(tagslice),
-//    connection_urls: array_to_vec(tagslice),
-  } };
-}
-
-fn array_to_vec<'a, I>(arr: I) -> Vec<&'a str>
-  where I: Iterator<Item=&'a str>
-{
 
   let mut vector = Vec::new();
   for i in arr {

@@ -69,8 +69,8 @@ impl Handler for UdpHandler {
 pub struct ServiceDescriptor<'a> {
     pub identifier: &'a str,
     pub tags: Vec<&'a str>,
-//    pub codecs: Vec<&'static str>,
-//    pub connection_urls: Vec<&'static str>
+    pub codecs: Vec<&'a str>,
+    pub connection_urls: Vec<&'a str>
 }
 
 impl <'a> ServiceDescriptor<'a> {
@@ -78,9 +78,9 @@ impl <'a> ServiceDescriptor<'a> {
 
         ServiceDescriptor {
             identifier: "AWESOME",
-            tags: vec!["h", "b"],
-//            codecs: vec!["h", "b"],
-//            connection_urls: vec!["h", "b"],
+            tags: vec![],
+            codecs: vec![],
+            connection_urls: vec![],
         }
     }
     pub fn get_identifier(&self) -> &'a str {
