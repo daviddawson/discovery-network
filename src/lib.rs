@@ -10,6 +10,7 @@ use std::ffi::CString;
 use std::ffi::CStr;
 use self::libc::c_char;
 use self::libc::size_t;
+use std::iter::Iterator;
 
 #[repr(C)]
 pub struct ServiceDescriptor {
@@ -46,30 +47,25 @@ pub extern fn advertise_local_service(target: *mut MulticastDiscovery, descripto
     })
   };
 
-  let mut vector = Vec::new();
-  {
-    let myvec = &mut vector;
-    for i in tagslice {
-      println!("{}", i);
-      myvec.push(i);
-    }
-  }
-
   let desc = unsafe { discovery::ServiceDescriptor {
     identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
-    tags: vector,
+    tags: array_to_vec(tagslice),
 //    codecs: array_to_vec(tagslice),
 //    connection_urls: array_to_vec(tagslice),
   } };
 }
-//
-//fn array_to_vec(arr: &[&'static str]) -> Vec<&'static str> {
-//  let mut vector = Vec::new();
-//  for i in arr.iter() {
-//    vector.push(*i);
-//  }
-//  vector
-//}
+
+fn array_to_vec<'a, I>(arr: I) -> Vec<&'a str>
+  where I: Iterator<Item=&'a str>
+{
+
+  let mut vector = Vec::new();
+  for i in arr {
+    println!("{}", i);
+    vector.push(i);
+  }
+  vector
+}
 //
 //#[no_mangle]
 //pub extern fn advertise_local_service_old(target: *mut MulticastDiscovery,
