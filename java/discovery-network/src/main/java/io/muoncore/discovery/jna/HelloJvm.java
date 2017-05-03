@@ -12,6 +12,7 @@ import reactor.core.processor.CancelException;
 import reactor.rx.broadcast.Broadcaster;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static io.muoncore.protocol.requestresponse.server.HandlerPredicates.path;
@@ -24,15 +25,17 @@ public class HelloJvm {
 //        NativeLoader.loadLibrary("muon_discovery_net");
 //
         NativeDiscovery disco = new NativeDiscovery("muon_discovery_net");
+
 //
 //        disco.onReady(() -> {
 //            System.out.println("WOOT");
 //        });
 //
-//        disco.advertiseLocalService(new ServiceDescriptor("wibble" + System.currentTimeMillis(), emptyList(), emptyList(), emptyList(), emptyList()));
-//
-//        //TODO, somehow integrate https://github.com/scijava/native-lib-loader
-//
+        disco.advertiseLocalService(
+                new ServiceDescriptor("wibble" + System.currentTimeMillis(),
+                        Arrays.asList("hello", "world", "simple"),
+                        emptyList(), emptyList(), emptyList()));
+
 //        Thread.sleep(40000);
 //        disco.shutdown();
 //        DiscoInstance muon = getMuon();

@@ -6,48 +6,126 @@ use std::thread;
 use std::string;
 mod discovery;
 use discovery::MulticastDiscovery;
+use std::ffi::CString;
+use std::ffi::CStr;
+use self::libc::c_char;
+use self::libc::size_t;
 
 #[repr(C)]
-pub struct OnReady {
-    callback: extern fn() -> bool
+pub struct ServiceDescriptor {
+  pub identifier: *mut c_char,
+  pub tags: *const *const c_char,
+  pub codecs: *const *const c_char,
+  pub connection_urls: *const *const c_char,
+  pub tags_length: size_t,
+  pub codecs_length: size_t,
+  pub connection_urls_length: size_t
 }
 
+//#[repr(C)]
+//pub struct OnReady {
+//    callback: extern fn() -> bool
+//}
+//
+//#[no_mangle]
+//pub extern fn get_known_services(target: *mut MulticastDiscovery) {
+//    unsafe {
+//        (*target).get_known_services();
+//    }
+//}
+//
 #[no_mangle]
-pub extern fn get_known_services(target: *mut MulticastDiscovery) {
-    unsafe {
-        (*target).get_known_services();
-    }
-}
+pub extern fn advertise_local_service(target: *mut MulticastDiscovery, descriptor:ServiceDescriptor) {
+  println!("Advertising? {}", descriptor.tags_length);
 
-#[no_mangle]
-pub extern fn advertise_local_service(target: *mut MulticastDiscovery, descriptor: *mut discovery::ServiceDescriptor) {
-    unsafe {
-        (*target).advertise_local_service(&*descriptor);
-    }
-}
+  let tagslice = unsafe {
+    std::slice::from_raw_parts(descriptor.tags as *const *const c_char, descriptor.tags_length as usize)
+      .iter().map(|tag| {
+      let val = CStr::from_ptr((*tag)).to_str();
+      return val.unwrap();
+    })
+  };
 
-#[no_mangle]
-pub extern fn on_ready(target: *mut MulticastDiscovery, call: OnReady) {
-    println!("I'm called from C");
-    unsafe {
-        (*target).on_ready(|| {
-            println!("EXTERNAL ON READY, calling exec.....");
-            (call.callback)();
-        })
+  let mut vector = Vec::new();
+  {
+    let myvec = &mut vector;
+    for i in tagslice {
+      println!("{}", i);
+      myvec.push(i);
     }
-}
+  }
 
+  let desc = unsafe { discovery::ServiceDescriptor {
+    identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
+    tags: vector,
+//    codecs: array_to_vec(tagslice),
+//    connection_urls: array_to_vec(tagslice),
+  } };
+}
+//
+//fn array_to_vec(arr: &[&'static str]) -> Vec<&'static str> {
+//  let mut vector = Vec::new();
+//  for i in arr.iter() {
+//    vector.push(*i);
+//  }
+//  vector
+//}
+//
+//#[no_mangle]
+//pub extern fn advertise_local_service_old(target: *mut MulticastDiscovery,
+//                                      tags: *const *const c_char, length: size_t) {
+//
+//  println!("Advertising? {}", length);
+//
+//  let tagslice = unsafe {
+//    std::slice::from_raw_parts(tags as *const *const c_char, length as usize)
+//      .iter().map( | tag | CStr::from_ptr((*tag)).to_str().unwrap())
+//  };
+//
+//  for x in tagslice {
+//    println!("{}", x);
+//  }
+//
+////  println!("Got 0, {:?}", tags);
+//
+//
+////  let v = unsafe { Vec::<T>::from_raw_parts(ptr, length, capacity) };
+//
+////  mytarget.advertise_local_service()
+//
+////    unsafe {
+////  unsafe { (*target).advertise_local_service(&discovery::ServiceDescriptor {
+////    identifier: (CString::new("AWESOME1234").unwrap().into_raw()),
+////    numberOfTags: 2,
+////    tags: tags,
+////    codecs: vec![],
+////    connection_urls: vec![],
+////  }); }
+//}
+//
+//#[no_mangle]
+//pub extern fn on_ready(target: *mut MulticastDiscovery, call: OnReady) {
+//    println!("I'm called from C");
+//    unsafe {
+//        (*target).on_ready(|| {
+//            println!("EXTERNAL ON READY, calling exec.....");
+//            (call.callback)();
+//        })
+//    }
+//}
+//
 #[no_mangle]
 pub extern fn create(name: *const u8) -> *mut MulticastDiscovery {
     Box::into_raw(Box::new(discovery::run()))
 }
-
-#[no_mangle]
-pub extern fn shutdown(target: *mut MulticastDiscovery) {
-    unsafe {
-        (*target).shutdown();
-    }
-}
+//
+//#[no_mangle]
+//pub extern fn shutdown(target: *mut MulticastDiscovery) {
+//    unsafe {
+//        (*target).shutdown();
+//        drop(target);
+//    }
+//}
 
 #[cfg(test)]
 mod tests {

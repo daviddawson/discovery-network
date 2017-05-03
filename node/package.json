@@ -1,0 +1,16 @@
+{
+  "name": "muon-discovery-net",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ffi": "^2.2.0",
+    "ref-array": "^1.2.0",
+    "ref-struct": "^1.1.0"
+  }
+}

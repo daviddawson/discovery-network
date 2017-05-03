@@ -1,12 +1,9 @@
 
 all: package
 
-lib:
-	mkdir -p discovery-network/src/main/resources/linux-x86-64/
-	cp ../target/release/libmuon_discovery_net.so discovery-network/src/main/resources/linux-x86-64/
-
-package: clean lib
+package: clean
 	pwd
+	cp ../target/release/libmuon_discovery_net.so discovery-network/src/main/resources/linux-x86-64/
 	./gradlew artifactoryPublish
 
 clean:

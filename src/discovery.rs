@@ -3,12 +3,8 @@ extern crate net2;
 extern crate mio;
 extern crate bytes;
 extern crate std;
-//#[macro_use]
-//extern crate log;
 
 use std::fmt;
-use self::libc::c_char;
-use std::ffi::CString;
 use std::thread;
 use std::sync::Mutex;
 use std::sync::Arc;
@@ -70,28 +66,25 @@ impl Handler for UdpHandler {
     }
 }
 
-
-#[repr(C)]
-pub struct ServiceDescriptor {
-    pub identifier: *mut c_char,
-    pub tags: Vec<&'static str>,
-    pub codecs: Vec<&'static str>,
-    pub connection_urls: Vec<&'static str>
+pub struct ServiceDescriptor<'a> {
+    pub identifier: &'a str,
+    pub tags: Vec<&'a str>,
+//    pub codecs: Vec<&'static str>,
+//    pub connection_urls: Vec<&'static str>
 }
 
-impl ServiceDescriptor {
-    pub fn create(identifier: &str) -> ServiceDescriptor {
+impl <'a> ServiceDescriptor<'a> {
+    pub fn create(identifier: &str) -> ServiceDescriptor<'a> {
+
         ServiceDescriptor {
-            identifier: (CString::new("AWESOME").unwrap().into_raw()),
+            identifier: "AWESOME",
             tags: vec!["h", "b"],
-            codecs: vec!["h", "b"],
-            connection_urls: vec!["h", "b"],
+//            codecs: vec!["h", "b"],
+//            connection_urls: vec!["h", "b"],
         }
     }
-    pub fn get_identifier(&self) -> String {
-        unsafe {
-            return CString::from_raw(self.identifier).into_string().unwrap();
-        }
+    pub fn get_identifier(&self) -> &'a str {
+       return self.identifier
     }
 }
 
@@ -179,7 +172,7 @@ impl MulticastDiscovery {
         arg();
     }
     pub fn advertise_local_service(& mut self, descriptor: &ServiceDescriptor) {
-        println!("Got 0, {}", self.name);
+//        println!("Got 0, {:?}", descriptor.tags);
         let data = self.lock.clone();
         println!("Got 1");
         let mut dat = data.lock().unwrap();

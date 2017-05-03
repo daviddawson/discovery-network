@@ -2,6 +2,7 @@
 
 lib:
 	cargo build --release
+	cp target/release/libmuon_discovery_net.so java/discovery-network/src/main/resources/linux-x86-64/
 
 
 publish: version lib
@@ -15,3 +16,6 @@ endif
 	echo "done version"
 	git commit -m "Update version to $(VERSION )while publishing"
 	git push origin
+
+test:
+	cargo test
