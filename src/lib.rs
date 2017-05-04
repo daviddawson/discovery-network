@@ -122,11 +122,3 @@ pub extern fn create(name: *const u8) -> *mut MulticastDiscovery {
 //    }
 //}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn it_works() {
-
-    }
-}

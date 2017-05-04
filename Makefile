@@ -18,4 +18,4 @@ endif
 	git push origin
 
 test:
-	cargo test
+	cargo test-xunit

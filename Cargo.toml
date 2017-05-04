@@ -1,5 +1,5 @@
 [package]
-name = "muon-discovery-net"
+name = "muon_discovery_net"
 version = "0.1.0"
 authors = ["David Dawson <me@daviddawson.me>"]
 
@@ -10,10 +10,11 @@ mio = "0.6.6"
 log = "0.3.6"
 env_logger = "0.4.0"
 bytes      = "0.3.0"
+cargo-test-xunit = { git = "https://github.com/evernym/cargo-test-xunit" }
 
 [lib]
 name = "muon_discovery_net"
-crate-type = ["dylib"]
+crate-type = ["rlib","dylib"]
 
 [[bin]]
 name = "mybin"
