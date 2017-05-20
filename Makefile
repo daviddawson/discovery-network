@@ -18,4 +18,8 @@ endif
 	git push origin
 
 test:
-	cargo test-xunit
+	RUST_TEST_THREADS=1 cargo test
+
+testtc:
+	cargo clean
+	RUST_TEST_THREADS=1 cargo test-xunit

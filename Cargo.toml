@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["David Dawson <me@daviddawson.me>"]
 
 [dependencies]
+uuid = "0.5.0"
 libc = "0.2"
 net2 = "0.2.27"
 mio = "0.6.6"

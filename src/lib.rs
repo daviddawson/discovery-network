@@ -14,6 +14,7 @@ use std::iter::Iterator;
 
 #[repr(C)]
 pub struct ServiceDescriptor {
+  pub id: *mut c_char,
   pub identifier: *mut c_char,
   pub tags: *const *const c_char,
   pub codecs: *const *const c_char,
@@ -39,12 +40,13 @@ pub struct ServiceDescriptor {
 pub extern fn advertise_local_service(target: *mut MulticastDiscovery, descriptor:ServiceDescriptor) {
   println!("Advertising? {}", descriptor.tags_length);
 
-  let desc = unsafe { discovery::ServiceDescriptor {
-    identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
-    tags: array_to_vec(descriptor.tags, descriptor.tags_length),
-    codecs: array_to_vec(descriptor.codecs, descriptor.codecs_length),
-    connection_urls: array_to_vec(descriptor.connection_urls, descriptor.connection_urls_length),
-  } };
+//  let desc = unsafe { discovery::InstanceDescriptor {
+//    id: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
+//    identifier: &CStr::from_ptr(descriptor.identifier).to_str().unwrap(),
+//    tags: array_to_vec(descriptor.tags, descriptor.tags_length),
+//    codecs: array_to_vec(descriptor.codecs, descriptor.codecs_length),
+//    connection_urls: array_to_vec(descriptor.connection_urls, descriptor.connection_urls_length),
+//  } };
 }
 
 fn array_to_vec<'a>(vals: *const *const c_char, len: size_t) -> Vec<&'a str>

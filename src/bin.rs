@@ -15,9 +15,9 @@ fn main() {
     info!("Commencing yak shaving for {}", "simples");
 
     let mut disco = discovery::run();
-    disco.on_ready(|| println!("DISCO IS READY!"));
+//    disco.on_ready(&|| println!("DISCO IS READY!"));
     thread::sleep(Duration::from_millis(2000));
-    disco.advertise_local_service(&discovery::ServiceDescriptor::create("AWESOME"));
+    disco.advertise_local_service(&discovery::InstanceDescriptor::create("AWESOME"));
 
     disco.get_known_services();
 
