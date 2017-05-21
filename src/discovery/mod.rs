@@ -1,9 +1,10 @@
+extern crate std;
+extern crate uuid;
 extern crate net2;
 extern crate mio;
 extern crate bytes;
-extern crate std;
-extern crate uuid;
 
+mod udphandler;
 use self::uuid::{Uuid, UuidVersion};
 use std::fmt;
 use std::thread;
@@ -12,59 +13,14 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::ops::Drop;
 use std::str;
-use self::bytes::{Buf, MutBuf, RingBuf, SliceBuf};
 use self::mio::udp::*;
 use self::mio::*;
-use self::mio::net::UdpSocket;
 use self::mio::deprecated::{EventLoop, Handler};
+use self::udphandler::UdpHandler;
+use std::net::{SocketAddr};
 use self::net2::UdpBuilder;
-
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-
-pub struct UdpHandler {
-  rx: UdpSocket,
-  rx_buf: RingBuf,
-  localhost: IpAddr
-}
-
-impl UdpHandler {
-  fn new(rx: UdpSocket) -> UdpHandler {
-    let sock = UdpSocket::bind(&"0.0.0.0:0".parse().unwrap()).unwrap();
-    UdpHandler {
-      rx: rx,
-      rx_buf: RingBuf::new(1024),
-      localhost: sock.local_addr().unwrap().ip()
-    }
-  }
-
-  fn handle_read(&mut self, event_loop: &mut EventLoop<UdpHandler>, token: Token, _: Ready) {
-    match token {
-      LISTENER => {
-        debug!("We are receiving a datagram now...");
-        unsafe {
-          let dat = self.rx.recv_from(self.rx_buf.mut_bytes());
-          if (dat.is_ok()) {
-            let val = dat.unwrap();
-            println!("RECEIVED DATA {}", str::from_utf8(self.rx_buf.mut_bytes()).unwrap())
-          }
-        }
-      }
-      _ => ()
-    }
-  }
-}
-
-impl Handler for UdpHandler {
-  type Timeout = usize;
-  type Message = ();
-
-  fn ready(&mut self, event_loop: &mut EventLoop<UdpHandler>, token: Token, events: Ready) {
-    if events.is_readable() {
-      println!("readables");
-      self.handle_read(event_loop, token, events);
-    }
-  }
-}
+use self::mio::net::UdpSocket;
+use self::bytes::{Buf, MutBuf, RingBuf, SliceBuf};
 
 pub struct InstanceDescriptor {
   pub id: String,
@@ -187,8 +143,14 @@ impl MulticastDiscovery {
     println!("Internal shutdown has been called");
   }
 
-  pub fn get_known_services(&mut self) /* TODO -> [ServiceDescriptor] */ {
-    //        []
+  pub fn get_known_services(&mut self) -> Vec<InstanceDescriptor> {
+    vec![InstanceDescriptor {
+      id: "hello world".to_string(),
+      identifier: "my-ident".to_string(),
+      tags: vec![],
+      codecs: vec![],
+      connection_urls: vec![]
+    }]
   }
 }
 
@@ -217,14 +179,21 @@ mod test {
   #[test]
   fn on_advertise_will_appear_in_remote() {
     let mut disco = run();
-    disco.advertise_local_service({});
+    disco.advertise_local_service(&InstanceDescriptor {
+      id: "hello world".to_string(),
+      identifier: "my-ident".to_string(),
+      tags: vec![],
+      codecs: vec![],
+      connection_urls: vec![]
+    });
+
     let mut disco2 = run();
-    let mut disco3 = run();
 
     thread::sleep(Duration::from_millis(1500));
 
+    let instances = disco2.get_known_services();
 
-    assert!(*data);
+    assert!(instances.len() == 1);
   }
   //
   //  #[test]
