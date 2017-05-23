@@ -14,10 +14,12 @@ fn main() {
     info!("booting up");
     info!("Commencing yak shaving for {}", "simples");
 
+    let me = discovery::InstanceDescriptor::create("AWESOME");
+
     let mut disco = discovery::run();
 //    disco.on_ready(&|| println!("DISCO IS READY!"));
     thread::sleep(Duration::from_millis(2000));
-    disco.advertise_local_service(&discovery::InstanceDescriptor::create("AWESOME"));
+    disco.advertise_local_service(me);
 
     disco.get_known_services();
 

@@ -1,3 +1,5 @@
+#![feature(box_syntax)]
+
 extern crate std;
 extern crate uuid;
 extern crate net2;
@@ -5,6 +7,8 @@ extern crate mio;
 extern crate bytes;
 
 mod udphandler;
+
+use std::collections::HashMap;
 use self::uuid::{Uuid, UuidVersion};
 use std::fmt;
 use std::thread;
@@ -22,6 +26,8 @@ use self::net2::UdpBuilder;
 use self::mio::net::UdpSocket;
 use self::bytes::{Buf, MutBuf, RingBuf, SliceBuf};
 
+
+#[derive(Clone, Debug)]
 pub struct InstanceDescriptor {
   pub id: String,
   pub identifier: String,
@@ -49,17 +55,23 @@ impl InstanceDescriptor {
 
 
 pub struct MulticastData {
-  pub name: &'static str,
+  pub local: Option<InstanceDescriptor>,
+  pub instances: Vec<InstanceDescriptor>
+}
+
+impl MulticastData {
+  pub fn add_instance(&mut self, descriptor: InstanceDescriptor) {
+    self.instances.push(descriptor);
+  }
 }
 
 #[repr(C)]
 pub struct MulticastDiscovery {
-  pub name: &'static str,
   pub lock: Arc<Mutex<MulticastData>>
 }
 
 pub fn run() -> MulticastDiscovery {
-  let data = Arc::new(Mutex::new(MulticastData { name: "awesome" }));
+  let data = Arc::new(Mutex::new(MulticastData { local: None, instances: Vec::new() }));
 
   let multi = MulticastDiscovery::create(data);
   multi
@@ -69,6 +81,8 @@ impl MulticastDiscovery {
   pub fn create(data: Arc<Mutex<MulticastData>>) -> MulticastDiscovery {
     let threaddata = data.clone();
     let senddata = data.clone();
+    let insertdata = data.clone();
+
 
     let address: SocketAddr = "0.0.0.0:7776".parse().unwrap();
 
@@ -87,15 +101,23 @@ impl MulticastDiscovery {
       let localhost = tx.local_addr().unwrap();
       loop {
         {
-          let dat = senddata.lock().unwrap();
-          let msg = format!("{} {}", dat.name, address);
-          let mut buf = SliceBuf::wrap(msg.as_bytes());
+          let mut dat = senddata.lock().unwrap();
 
-          println!("Sending....{}", addr);
-          let cnt = tx.send_to(buf.bytes(), &"227.1.1.100:7776".parse().unwrap())
-            .unwrap();
+          match dat.local {
+            Some(ref x) => {
+//              let msg = format!("{} {}", x.identifier, address);
+              let msg = format!("{}", x.identifier);
+              let buf = SliceBuf::wrap(msg.as_bytes());
+
+              println!("Sending....{}", msg);
+              let cnt = tx.send_to(buf.bytes(), &"227.1.1.100:7776".parse().unwrap())
+                .unwrap();
+            }
+            None => {
+
+            }
+          }
         }
-        //                buf.advance(cnt);
         thread::sleep(Duration::from_millis(500));
       }
     });
@@ -115,10 +137,10 @@ impl MulticastDiscovery {
       event_loop.register(&rx, LISTENER, Ready::readable(), PollOpt::edge()).unwrap();
 
       println!("Starting event loop to test with...");
-      event_loop.run(&mut UdpHandler::new(rx)).unwrap();
+      event_loop.run(&mut UdpHandler::new(rx, insertdata)).unwrap();
     });
 
-    return MulticastDiscovery { lock: data, name: "Happy" };
+    return MulticastDiscovery { lock: data.clone() };
   }
 
   pub fn on_ready<F>(&self, func: F)
@@ -129,13 +151,12 @@ impl MulticastDiscovery {
       function();
     });
   }
-  pub fn advertise_local_service(&mut self, descriptor: &InstanceDescriptor) {
-    //        println!("Got 0, {:?}", descriptor.tags);
+  pub fn advertise_local_service(&mut self, descriptor: InstanceDescriptor) {
     let data = self.lock.clone();
     println!("Got 1");
     let mut dat = data.lock().unwrap();
     println!("Got 2");
-    dat.name = "HELLO WORLD";
+    dat.local = Some(descriptor.clone());
     println!("Advertising a local instance {}", descriptor.get_identifier());
   }
 
@@ -144,13 +165,8 @@ impl MulticastDiscovery {
   }
 
   pub fn get_known_services(&mut self) -> Vec<InstanceDescriptor> {
-    vec![InstanceDescriptor {
-      id: "hello world".to_string(),
-      identifier: "my-ident".to_string(),
-      tags: vec![],
-      codecs: vec![],
-      connection_urls: vec![]
-    }]
+    let mut dat = self.lock.lock().unwrap();
+    dat.instances.clone()
   }
 }
 
@@ -179,13 +195,16 @@ mod test {
   #[test]
   fn on_advertise_will_appear_in_remote() {
     let mut disco = run();
-    disco.advertise_local_service(&InstanceDescriptor {
-      id: "hello world".to_string(),
-      identifier: "my-ident".to_string(),
+
+    let me = InstanceDescriptor {
+      id: "my-id".to_string(),
+      identifier: "my-identinf".to_string(),
       tags: vec![],
       codecs: vec![],
       connection_urls: vec![]
-    });
+    };
+
+    disco.advertise_local_service(me);
 
     let mut disco2 = run();
 
@@ -193,13 +212,36 @@ mod test {
 
     let instances = disco2.get_known_services();
 
-    assert!(instances.len() == 1);
+    assert!(instances.len() > 1);
+
+    println!("Name is {}", instances[0].identifier);
+
+    assert_eq!(instances[0].identifier.trim(), "my-identinf");
   }
-  //
-  //  #[test]
-  //  fn get_known_services_returns_all() {
-  //    assert!(1i32 == 3i32);
-  //  }
+
+  #[test]
+  fn get_known_services_returns_all() {
+    let mut multi = MulticastData {
+      local: Some(InstanceDescriptor {
+        id: "my-id".to_string(),
+        identifier: "my-identinf".to_string(),
+        tags: vec![],
+        codecs: vec![],
+        connection_urls: vec![]
+      }),
+      instances: Vec::new()
+    };
+
+    multi.add_instance(InstanceDescriptor {
+      id: "simple".to_string(),
+      identifier: "hello".to_string(),
+      tags: vec![],
+      codecs: vec![],
+      connection_urls: vec![]
+    });
+
+    assert!(multi.instances.len() == 1);
+  }
   //
   //  #[test]
   //  fn expires_cache_5s() {
