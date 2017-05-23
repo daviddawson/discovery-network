@@ -2,6 +2,7 @@ package io.muoncore.discovery.jna;
 
 import com.sun.jna.*;
 import io.muoncore.Discovery;
+import io.muoncore.InstanceDescriptor;
 import io.muoncore.ServiceDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class NativeDiscovery implements Discovery {
 
     public static class ServiceDescriptorInternal extends Structure implements Structure.ByValue {
 
+        public String id;
         public String identifier;
         public Pointer tags;
         public Pointer codecs;
@@ -38,6 +40,7 @@ public class NativeDiscovery implements Discovery {
         @Override
         protected List<String> getFieldOrder() {
             return Arrays.asList(
+                    "id",
                     "identifier",
                     "tags",
                     "codecs",
@@ -92,8 +95,9 @@ public class NativeDiscovery implements Discovery {
     }
 
     @Override
-    public void advertiseLocalService(ServiceDescriptor serviceDescriptor) {
+    public void advertiseLocalService(InstanceDescriptor serviceDescriptor) {
         ServiceDescriptorInternal sd = new ServiceDescriptorInternal();
+        sd.id = serviceDescriptor.getInstanceId();
         sd.identifier = serviceDescriptor.getIdentifier();
 
         sd.tags = makeStringArray(serviceDescriptor.getTags());
@@ -101,7 +105,7 @@ public class NativeDiscovery implements Discovery {
         sd.connection_urls = makeStringArrayFromUrl(serviceDescriptor.getConnectionUrls());
 
         sd.tags_length = serviceDescriptor.getTags().size();
-        sd.codecs_length = serviceDescriptor.getCodecs().length;
+        sd.codecs_length = serviceDescriptor.getCodecs().size();
         sd.connection_urls_length = serviceDescriptor.getConnectionUrls().size();
 
         discoLib.advertise_local_service(instance, sd);

@@ -4,10 +4,11 @@ apply plugin: 'java'
 repositories {
   jcenter()
   maven { url 'https://simplicityitself.artifactoryonline.com/simplicityitself/muon' }
+  mavenLocal()
 }
 
 dependencies {
-  def muonVersion = "7.2.9"
+  def muonVersion = "7.3.0-SNAPSHOT"
 
   compile "io.muoncore:muon-core:$muonVersion"
   compile "io.muoncore:muon-transport-amqp:$muonVersion"

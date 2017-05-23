@@ -1,5 +1,6 @@
 package io.muoncore.discovery.jna;
 
+import io.muoncore.InstanceDescriptor;
 import io.muoncore.Muon;
 import io.muoncore.MuonBuilder;
 import io.muoncore.ServiceDescriptor;
@@ -14,6 +15,7 @@ import reactor.rx.broadcast.Broadcaster;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 import static io.muoncore.protocol.requestresponse.server.HandlerPredicates.path;
 import static java.util.Collections.emptyList;
@@ -27,12 +29,12 @@ public class HelloJvm {
         NativeDiscovery disco = new NativeDiscovery("muon_discovery_net");
 
 //
-//        disco.onReady(() -> {
-//            System.out.println("WOOT");
-//        });
+        disco.onReady(() -> {
+            System.out.println("WOOT");
+        });
 //
         disco.advertiseLocalService(
-                new ServiceDescriptor("wibble" + System.currentTimeMillis(),
+                new InstanceDescriptor(UUID.randomUUID().toString(), "wibble" + System.currentTimeMillis(),
                         Arrays.asList("hello", "world", "simple"),
                         emptyList(), emptyList(), emptyList()));
 
