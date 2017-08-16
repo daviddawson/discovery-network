@@ -1,7 +1,6 @@
 package io.muoncore.discovery.jna;
 
 import io.muoncore.InstanceDescriptor;
-import io.muoncore.ServiceDescriptor;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,6 +14,21 @@ public class HelloJvm {
 //        NativeLibraryUtil.loadNativeLibrary(HelloJvm.class, "muon_discovery_net");
 //        NativeLoader.loadLibrary("muon_discovery_net");
 //
+
+        /**
+         * TODO
+         *
+         * get_service_names
+         * get_service_named
+         *get_service_with_tags
+         *
+         * add a logging method to allow using host language logging.
+         * info
+         * debug
+         *
+         */
+
+
         NativeDiscovery disco = new NativeDiscovery("muon_discovery_net");
 
 
@@ -36,7 +50,7 @@ public class HelloJvm {
 //        System.out.println("svc = " + myService.getIdentifier());
 //
         Thread.sleep(6000);
-//        disco.shutdown();
+        disco.shutdown();
 
 //        muon.getDiscovery().blockUntilReady();
 

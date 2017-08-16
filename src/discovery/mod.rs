@@ -105,7 +105,7 @@ impl MulticastDiscovery {
 
           match dat.local {
             Some(ref x) => {
-//              let msg = format!("{} {}", x.identifier, address);
+              //              let msg = format!("{} {}", x.identifier, address);
               let msg = format!("{}", x.identifier);
               let buf = SliceBuf::wrap(msg.as_bytes());
 
@@ -113,9 +113,7 @@ impl MulticastDiscovery {
               let cnt = tx.send_to(buf.bytes(), &"227.1.1.100:7776".parse().unwrap())
                 .unwrap();
             }
-            None => {
-
-            }
+            None => {}
           }
         }
         thread::sleep(Duration::from_millis(500));

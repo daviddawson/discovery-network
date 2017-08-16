@@ -36,26 +36,26 @@ impl UdpHandler {
     match token {
       LISTENER => {
         debug!("We are receiving a datagram now...");
-          let dat = unsafe { self.rx.recv_from(self.rx_buf.mut_bytes()) };
-          if dat.is_ok() {
-            let (bytes_read, address) = dat.unwrap();
+        let dat = unsafe { self.rx.recv_from(self.rx_buf.mut_bytes()) };
+        if dat.is_ok() {
+          let (bytes_read, address) = dat.unwrap();
 
-            let str = unsafe { str::from_utf8(&self.rx_buf.mut_bytes()[0..bytes_read]).unwrap().trim() };
-            println!("RECEIVED DATA {} {}", str, str.len());
+          let str = unsafe { str::from_utf8(&self.rx_buf.mut_bytes()[0..bytes_read]).unwrap().trim() };
+          println!("RECEIVED DATA {} {}", str, str.len());
 
-            let mylock = self.cache.clone();
-            let mut lock = mylock.lock().unwrap();
+          let mylock = self.cache.clone();
+          let mut lock = mylock.lock().unwrap();
 
-//            println!("RECEIVED DATA {}", lock);
-            lock.add_instance(InstanceDescriptor {
-              id: str.to_string(),
-              identifier: str.to_string(),
-              tags: vec![],
-              codecs: vec![],
-              connection_urls: vec![],
-            });
-            println!("added a new instance {} - {}", str, lock.instances.len());
-          }
+          //            println!("RECEIVED DATA {}", lock);
+          lock.add_instance(InstanceDescriptor {
+            id: str.to_string(),
+            identifier: str.to_string(),
+            tags: vec![],
+            codecs: vec![],
+            connection_urls: vec![],
+          });
+          println!("added a new instance {} - {}", str, lock.instances.len());
+        }
       }
       _ => ()
     }

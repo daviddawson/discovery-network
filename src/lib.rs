@@ -29,7 +29,7 @@ pub struct InstanceDescriptor {
 
 #[repr(C)]
 pub struct OnReady {
-    callback: extern fn() -> bool
+  callback: extern fn() -> bool
 }
 
 //TODO, explicitly destroy the Service Instances
@@ -37,18 +37,18 @@ pub struct OnReady {
 
 #[no_mangle]
 pub extern fn get_service_names(target: *mut MulticastDiscovery) {
-    let services = unsafe {
-        (*target).get_known_services();
-    };
+  let services = unsafe {
+    (*target).get_known_services();
+  };
 
   //TODO, transform to a list of cstr
 }
 
 #[no_mangle]
 pub extern fn get_service_named(target: *mut MulticastDiscovery) -> InstanceDescriptor {
-//  let instances = unsafe {
-//    (*target).get_known_services();
-//  };
+  //  let instances = unsafe {
+  //    (*target).get_known_services();
+  //  };
   println!("Getting service named");
   //TODO, find the right one
   unsafe {
@@ -159,13 +159,13 @@ fn array_to_vec<'a>(vals: *const *const c_char, len: size_t) -> Vec<String>
 
 #[no_mangle]
 pub extern fn on_ready(target: *mut MulticastDiscovery, call: OnReady) {
-    println!("I'm called from C");
-    unsafe {
-        (*target).on_ready(move || {
-            println!("EXTERNAL ON READY, calling exec.....");
-            (call.callback)();
-        })
-    }
+  println!("I'm called from C");
+  unsafe {
+    (*target).on_ready(move || {
+      println!("EXTERNAL ON READY, calling exec.....");
+      (call.callback)();
+    })
+  }
 }
 
 #[no_mangle]
@@ -177,10 +177,10 @@ pub extern fn create(name: *const u8) -> *mut MulticastDiscovery {
 
 #[no_mangle]
 pub extern fn shutdown(target: *mut MulticastDiscovery) {
-    unsafe {
-        (*target).shutdown();
-        drop(target);
-    }
+  unsafe {
+    (*target).shutdown();
+    drop(target);
+  }
 }
 
 

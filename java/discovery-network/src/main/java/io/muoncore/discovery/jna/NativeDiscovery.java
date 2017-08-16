@@ -6,8 +6,6 @@ import io.muoncore.InstanceDescriptor;
 import io.muoncore.ServiceDescriptor;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.scijava.nativelib.NativeLibraryUtil;
-import org.scijava.nativelib.NativeLoader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,9 +20,12 @@ public class NativeDiscovery implements Discovery {
 
     public static class ServiceDescriptorInternal extends Structure {
         @NoArgsConstructor
-        public static class ByValue extends ServiceDescriptorInternal implements Structure.ByValue {}
+        public static class ByValue extends ServiceDescriptorInternal implements Structure.ByValue {
+        }
+
         @NoArgsConstructor
-        public static class ByReference extends ServiceDescriptorInternal implements Structure.ByReference {}
+        public static class ByReference extends ServiceDescriptorInternal implements Structure.ByReference {
+        }
 
         public String id;
         public String identifier;
@@ -41,6 +42,7 @@ public class NativeDiscovery implements Discovery {
             }
             return Collections.emptyList();
         }
+
         public List<URI> getConnectionUrls() {
             if (connection_urls_length > 0) {
                 return Arrays.stream(connection_urls.getStringArray(0, connection_urls_length)).map(s -> {
@@ -54,6 +56,7 @@ public class NativeDiscovery implements Discovery {
             }
             return Collections.emptyList();
         }
+
         public List<String> getCodecs() {
             if (codecs_length > 0) {
                 return Arrays.asList(codecs.getStringArray(0, codecs_length));
@@ -72,7 +75,7 @@ public class NativeDiscovery implements Discovery {
                     "tags_length",
                     "codecs_length",
                     "connection_urls_length"
-                    );
+            );
         }
     }
 
@@ -94,10 +97,13 @@ public class NativeDiscovery implements Discovery {
         void on_ready(Pointer m, Callback cb);
 
         ServiceDescriptorInternal.ByValue get_service_named(Pointer discoInstance);
+
         String[] get_service_names();
+
         ServiceDescriptorInternal.ByValue get_service_with_tags(Pointer discoInstance, Pointer tags, int tagCount);
 
         void destroy_descriptor(ServiceDescriptorInternal.ByReference ref);
+
         void shutdown(Pointer discoInstance);
 
         Pointer create();
@@ -168,12 +174,14 @@ public class NativeDiscovery implements Discovery {
     private Pointer makeStringArray(String[] data) {
         return new StringArray(data);
     }
+
     private Pointer makeStringArrayFromUrl(List<URI> data) {
         String[] stringVals = data.stream()
                 .map(URI::toASCIIString).collect(Collectors.toList()).toArray(new String[data.size()]);
 
         return new StringArray(stringVals);
     }
+
     private Pointer makeStringArray(List<String> data) {
         String[] stringVals = new ArrayList<>(data).toArray(new String[data.size()]);
 

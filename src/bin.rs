@@ -10,20 +10,19 @@ use std::thread;
 mod discovery;
 
 fn main() {
-    env_logger::init().unwrap();
-    info!("booting up");
-    info!("Commencing yak shaving for {}", "simples");
+  env_logger::init().unwrap();
+  info!("booting up");
+  info!("Commencing yak shaving for {}", "simples");
 
-    let me = discovery::InstanceDescriptor::create("AWESOME");
+  let me = discovery::InstanceDescriptor::create("AWESOME");
 
-    let mut disco = discovery::run();
-//    disco.on_ready(&|| println!("DISCO IS READY!"));
-    thread::sleep(Duration::from_millis(2000));
-    disco.advertise_local_service(me);
+  let mut disco = discovery::run();
+  //    disco.on_ready(&|| println!("DISCO IS READY!"));
+  thread::sleep(Duration::from_millis(2000));
+  disco.advertise_local_service(me);
 
-    disco.get_known_services();
+  disco.get_known_services();
 
-    thread::sleep(Duration::from_millis(15000));
-    println!("RAGGLE");
-
+  thread::sleep(Duration::from_millis(15000));
+  println!("RAGGLE");
 }
