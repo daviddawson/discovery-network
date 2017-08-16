@@ -1,23 +1,12 @@
 package io.muoncore.discovery.jna;
 
 import io.muoncore.InstanceDescriptor;
-import io.muoncore.Muon;
-import io.muoncore.MuonBuilder;
 import io.muoncore.ServiceDescriptor;
-import io.muoncore.config.AutoConfiguration;
-import io.muoncore.config.MuonConfigBuilder;
-import io.muoncore.protocol.reactivestream.server.PublisherLookup;
-import org.scijava.nativelib.NativeLibraryUtil;
-import org.scijava.nativelib.NativeLoader;
-import reactor.core.processor.CancelException;
-import reactor.rx.broadcast.Broadcaster;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.UUID;
 
-import static io.muoncore.protocol.requestresponse.server.HandlerPredicates.path;
 import static java.util.Collections.emptyList;
 
 public class HelloJvm {
@@ -28,19 +17,26 @@ public class HelloJvm {
 //
         NativeDiscovery disco = new NativeDiscovery("muon_discovery_net");
 
-//
+
         disco.onReady(() -> {
             System.out.println("WOOT");
         });
-//
+
         disco.advertiseLocalService(
                 new InstanceDescriptor(UUID.randomUUID().toString(), "wibble" + System.currentTimeMillis(),
                         Arrays.asList("hello", "world", "simple"),
                         emptyList(), emptyList(), emptyList()));
 
-//        Thread.sleep(40000);
+        Thread.sleep(1000);
+
+        disco.getServiceNamed("wibble").ifPresent(serviceDescriptor -> {
+            System.out.println("svc = " + serviceDescriptor.getIdentifier());
+        });
+
+//        System.out.println("svc = " + myService.getIdentifier());
+//
+        Thread.sleep(6000);
 //        disco.shutdown();
-//        DiscoInstance muon = getMuon();
 
 //        muon.getDiscovery().blockUntilReady();
 

@@ -8,11 +8,9 @@ repositories {
 }
 
 dependencies {
-  def muonVersion = "7.3.0-SNAPSHOT"
+  def muonVersion = "7.3.4"
 
-  compile "io.muoncore:muon-core:$muonVersion"
-  compile "io.muoncore:muon-transport-amqp:$muonVersion"
-  compile "io.muoncore:muon-discovery-amqp:$muonVersion"
+  compile "io.muoncore:muon-core:7.3.4"
   testCompile 'org.codehaus.groovy:groovy-all:2.4.7'
   testCompile 'org.slf4j:slf4j-simple:1.7.21'
 

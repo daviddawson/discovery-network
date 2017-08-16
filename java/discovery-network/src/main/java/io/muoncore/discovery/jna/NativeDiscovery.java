@@ -11,10 +11,8 @@ import org.scijava.nativelib.NativeLoader;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NativeDiscovery implements Discovery {
@@ -22,7 +20,11 @@ public class NativeDiscovery implements Discovery {
     private DiscoveryLib discoLib;
     private Pointer instance;
 
-    public static class ServiceDescriptorInternal extends Structure implements Structure.ByValue {
+    public static class ServiceDescriptorInternal extends Structure {
+        @NoArgsConstructor
+        public static class ByValue extends ServiceDescriptorInternal implements Structure.ByValue {}
+        @NoArgsConstructor
+        public static class ByReference extends ServiceDescriptorInternal implements Structure.ByReference {}
 
         public String id;
         public String identifier;
@@ -34,7 +36,29 @@ public class NativeDiscovery implements Discovery {
         public int connection_urls_length;
 
         public List<String> getTags() {
-            return Arrays.asList(tags.getStringArray(0, tags_length));
+            if (tags_length > 0) {
+                return Arrays.asList(tags.getStringArray(0, tags_length));
+            }
+            return Collections.emptyList();
+        }
+        public List<URI> getConnectionUrls() {
+            if (connection_urls_length > 0) {
+                return Arrays.stream(connection_urls.getStringArray(0, connection_urls_length)).map(s -> {
+                    try {
+                        return new URI(s);
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }).collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        }
+        public List<String> getCodecs() {
+            if (codecs_length > 0) {
+                return Arrays.asList(codecs.getStringArray(0, codecs_length));
+            }
+            return Collections.emptyList();
         }
 
         @Override
@@ -65,38 +89,68 @@ public class NativeDiscovery implements Discovery {
     }
 
     public interface DiscoveryLib extends Library {
-        void advertise_local_service(Pointer discoInstance, ServiceDescriptorInternal sdi);
+        void advertise_local_service(Pointer discoInstance, ServiceDescriptorInternal.ByValue sdi);
 
         void on_ready(Pointer m, Callback cb);
 
-        List<ServiceDescriptorInternal> get_known_services(Pointer discoInstance);
+        ServiceDescriptorInternal.ByValue get_service_named(Pointer discoInstance);
+        String[] get_service_names();
+        ServiceDescriptorInternal.ByValue get_service_with_tags(Pointer discoInstance, Pointer tags, int tagCount);
 
+        void destroy_descriptor(ServiceDescriptorInternal.ByReference ref);
         void shutdown(Pointer discoInstance);
 
-        Pointer create(String name);
+        Pointer create();
     }
 
     public NativeDiscovery(String libName) throws IOException {
-
-//        NativeLoader.loadLibrary(libName);
-//        NativeLibraryUtil.loadNativeLibrary(NativeDiscovery.class, libName);
-
         discoLib = Native.loadLibrary(libName,
                 DiscoveryLib.class);
-        instance = discoLib.create("WOOT BOOT");
+        instance = discoLib.create();
     }
 
     @Override
-    public List<ServiceDescriptor> getKnownServices() {
-        return discoLib.get_known_services(instance)
-                .stream()
-                .map(serviceDescriptorInternal -> new ServiceDescriptor(null, null, null, null, null))
-                .collect(Collectors.toList());
+    public List<String> getServiceNames() {
+        return Arrays.asList(discoLib.get_service_names());
+    }
+
+    @Override
+    public Optional<ServiceDescriptor> getServiceNamed(String s) {
+        ServiceDescriptorInternal.ByValue disco = discoLib.get_service_named(instance);
+
+
+        if (disco == null) return Optional.empty();
+        System.out.println("TAGS = " + disco.tags_length);
+        System.out.println("ID = " + disco.id);
+        System.out.println("SVC = " + disco.identifier);
+        ServiceDescriptor external = makeFrom(disco);
+////        discoLib.destroy_descriptor(disco);
+        return Optional.of(external);
+    }
+
+    private ServiceDescriptor makeFrom(ServiceDescriptorInternal internal) {
+        List<InstanceDescriptor> instances = new ArrayList<>();
+
+        System.out.println("Chasing the dragon");
+
+        instances.add(new InstanceDescriptor(
+                internal.id, internal.identifier, internal.getTags(), internal.getCodecs(), internal.getConnectionUrls(), Collections.emptyList()
+        ));
+
+        return new ServiceDescriptor(
+                internal.identifier, internal.getTags(), internal.getCodecs(), Collections.emptyList(), instances);
+    }
+
+    @Override
+    public Optional<ServiceDescriptor> getServiceWithTags(String... strings) {
+        ServiceDescriptorInternal disco = discoLib.get_service_with_tags(instance, makeStringArray(strings), strings.length);
+        if (disco == null) return Optional.empty();
+        return Optional.of(makeFrom(disco));
     }
 
     @Override
     public void advertiseLocalService(InstanceDescriptor serviceDescriptor) {
-        ServiceDescriptorInternal sd = new ServiceDescriptorInternal();
+        ServiceDescriptorInternal.ByValue sd = new ServiceDescriptorInternal.ByValue();
         sd.id = serviceDescriptor.getInstanceId();
         sd.identifier = serviceDescriptor.getIdentifier();
 
